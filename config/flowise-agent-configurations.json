@@ -1,0 +1,730 @@
+{
+  "flowise_agent_nodes": {
+
+    "supervisor_node": {
+      "id": "fascia-ai-supervisor",
+      "name": "Fascia AI Supervisor",
+      "type": "multiAgentSupervisor",
+      "position": [400, 100],
+      "data": {
+        "label": "Fascia AI Supervisor",
+        "name": "multiAgentSupervisor",
+        "version": 1.0,
+        "description": "Central orchestrator for Fascia AI chatbot",
+        "baseClasses": ["BaseMessage", "SystemMessage"],
+        "inputs": {
+          "model": {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "ChatAnthropic",
+            "id": "chatanthropic_supervisor"
+          },
+          "memory": {
+            "label": "Memory", 
+            "name": "memory",
+            "type": "ConversationSummaryBufferMemory",
+            "id": "memory_supervisor"
+          },
+          "systemMessage": {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "rows": 4,
+            "default": "You are the Fascia AI Supervisor, coordinating expert agents in fascia research and treatment.\n\nYour team includes:\n- Research_Specialist: Academic research and evidence synthesis\n- Diagnosis_Assistant: Symptom analysis and assessment guidance\n- Treatment_Protocol: Evidence-based treatment recommendations\n- Image_Generator: Anatomical visualizations and diagrams\n- Data_Collector: Web scraping and data collection\n- Knowledge_Manager: Database and knowledge base management\n\nRoute queries appropriately and ensure HIPAA compliance. Always provide medical disclaimers for health-related advice.\n\nAvailable team members: {team_members}\n\nWhen all tasks are complete, respond with FINISH."
+          },
+          "recursionLimit": {
+            "label": "Recursion Limit",
+            "name": "recursionLimit",
+            "type": "number",
+            "default": 15
+          }
+        }
+      }
+    },
+
+    "research_specialist_worker": {
+      "id": "research-specialist-worker",
+      "name": "Research Specialist Agent",
+      "type": "multiAgentWorker",
+      "position": [100, 300],
+      "data": {
+        "label": "Research Specialist",
+        "name": "multiAgentWorker",
+        "version": 1.0,
+        "description": "Specialized in fascia research and academic analysis",
+        "inputs": {
+          "workerName": {
+            "label": "Worker Name",
+            "name": "workerName", 
+            "type": "string",
+            "default": "Research_Specialist"
+          },
+          "model": {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "ChatAnthropic",
+            "id": "chatanthropic_research"
+          },
+          "systemMessage": {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "rows": 4,
+            "default": "You are a Fascia Research Specialist with expertise in both Eastern and Western medicine approaches.\n\nCapabilities:\n- Analyze research papers and clinical studies\n- Synthesize findings from multiple sources\n- Bridge Eastern and Western medical perspectives\n- Evaluate evidence quality and strength\n- Provide proper citations and references\n\nAlways:\n- Indicate evidence strength (high, moderate, low confidence)\n- Cite specific sources with DOI when available\n- Note any conflicts or limitations in research\n- Distinguish between established science and emerging theories\n- Maintain scientific rigor while being accessible"
+          },
+          "tools": [
+            {
+              "label": "Vector Store Retriever",
+              "name": "retrieverTool",
+              "id": "vectorstore_research"
+            },
+            {
+              "label": "PubMed Search",
+              "name": "customTool",
+              "id": "pubmed_search"
+            }
+          ],
+          "maxIterations": {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "default": 5
+          }
+        }
+      }
+    },
+
+    "diagnosis_assistant_worker": {
+      "id": "diagnosis-assistant-worker", 
+      "name": "Diagnosis Assistant Agent",
+      "type": "multiAgentWorker",
+      "position": [300, 300],
+      "data": {
+        "label": "Diagnosis Assistant",
+        "name": "multiAgentWorker",
+        "version": 1.0,
+        "description": "Specialized in fascia-related assessment and symptom analysis",
+        "inputs": {
+          "workerName": {
+            "label": "Worker Name",
+            "name": "workerName",
+            "type": "string", 
+            "default": "Diagnosis_Assistant"
+          },
+          "model": {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "ChatOpenAI",
+            "id": "chatopenai_diagnosis"
+          },
+          "systemMessage": {
+            "label": "System Message",
+            "name": "systemMessage", 
+            "type": "string",
+            "rows": 4,
+            "default": "You are a Fascia Diagnostic Assistant specializing in myofascial assessment.\n\nScope: ONLY fascia and related connective tissue structures\n\nCapabilities:\n- Analyze pain patterns and movement restrictions\n- Map symptoms to anatomical fascial lines\n- Suggest potential myofascial relationships\n- Recommend assessment approaches\n\nCRITICAL SAFETY PROTOCOLS:\n- ALWAYS include medical disclaimers\n- Recommend professional consultation for diagnosis\n- Stay within fascia/connective tissue scope only\n- Never provide definitive diagnoses\n- Refer to healthcare professionals for complex cases\n- Flag any red flag symptoms for immediate medical attention\n\nFormat responses with:\n1. Disclaimer statement\n2. Possible fascial relationships\n3. Suggested professional evaluation\n4. Educational information only"
+          },
+          "tools": [
+            {
+              "label": "Anatomy Lines Retriever",
+              "name": "retrieverTool",
+              "id": "anatomy_trains_vectorstore"
+            },
+            {
+              "label": "Symptom Analyzer",
+              "name": "customTool",
+              "id": "symptom_analysis_tool"
+            }
+          ],
+          "maxIterations": {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "default": 3
+          }
+        }
+      }
+    },
+
+    "treatment_protocol_worker": {
+      "id": "treatment-protocol-worker",
+      "name": "Treatment Protocol Agent", 
+      "type": "multiAgentWorker",
+      "position": [500, 300],
+      "data": {
+        "label": "Treatment Protocol",
+        "name": "multiAgentWorker",
+        "version": 1.0,
+        "description": "Specialized in evidence-based fascia treatment protocols",
+        "inputs": {
+          "workerName": {
+            "label": "Worker Name",
+            "name": "workerName",
+            "type": "string",
+            "default": "Treatment_Protocol"
+          },
+          "model": {
+            "label": "Chat Model", 
+            "name": "model",
+            "type": "ChatAnthropic",
+            "id": "chatanthropic_treatment"
+          },
+          "systemMessage": {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string", 
+            "rows": 4,
+            "default": "You are a Fascia Treatment Specialist providing evidence-based protocols.\n\nExpertise:\n- Myofascial release techniques\n- Manual therapy approaches\n- Movement and exercise protocols\n- Eastern medicine integration\n- Professional treatment methods\n\nFor each recommendation:\n1. Specify evidence level (strong, moderate, limited)\n2. List contraindications and precautions\n3. Note required professional training\n4. Combine Western and Eastern approaches when appropriate\n5. Include safety considerations\n\nAlways emphasize:\n- Professional guidance for implementation\n- Individual assessment needs\n- Progressive approach to treatment\n- Monitor response and adjust\n- When to seek additional help\n\nStructure responses:\n- Treatment approach\n- Evidence basis\n- Contraindications\n- Implementation notes\n- Professional recommendations"
+          },
+          "tools": [
+            {
+              "label": "Treatment Database",
+              "name": "retrieverTool", 
+              "id": "treatment_protocols_vectorstore"
+            },
+            {
+              "label": "Contraindication Checker",
+              "name": "customTool",
+              "id": "contraindication_tool"
+            }
+          ],
+          "maxIterations": {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "default": 4
+          }
+        }
+      }
+    },
+
+    "image_generator_worker": {
+      "id": "image-generator-worker",
+      "name": "Image Generation Agent",
+      "type": "multiAgentWorker", 
+      "position": [700, 300],
+      "data": {
+        "label": "Image Generator",
+        "name": "multiAgentWorker",
+        "version": 1.0,
+        "description": "Specialized in creating anatomical visualizations",
+        "inputs": {
+          "workerName": {
+            "label": "Worker Name",
+            "name": "workerName",
+            "type": "string",
+            "default": "Image_Generator"
+          },
+          "model": {
+            "label": "Chat Model",
+            "name": "model", 
+            "type": "ChatGoogleGenerativeAI",
+            "id": "chatgoogle_vision"
+          },
+          "systemMessage": {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "rows": 4,
+            "default": "You are a Medical Visualization Specialist creating anatomical diagrams.\n\nSpecializations:\n- Fascia and connective tissue anatomy\n- Anatomy Trains myofascial lines\n- Treatment point locations\n- Movement patterns and restrictions\n\nImage Requirements:\n- Medically accurate anatomy\n- Clear anatomical labeling\n- Standard anatomical color coding\n- Educational quality\n- Professional presentation\n\nFor each request:\n1. Clarify anatomical region\n2. Determine view angle needed\n3. Specify structures to highlight\n4. Include relevant fascial lines\n5. Add educational annotations\n\nColor Standards:\n- Fascia: translucent white/gray\n- Muscles: red/brown\n- Bones: beige/cream\n- Nerves: yellow\n- Blood vessels: red/blue\n- Skin: flesh tone\n\nAlways include:\n- Accurate proportions\n- Proper anatomical terminology\n- Clear visual hierarchy\n- Educational context"
+          },
+          "tools": [
+            {
+              "label": "Image Generator",
+              "name": "customTool",
+              "id": "gemini_image_tool"
+            },
+            {
+              "label": "Anatomy Reference",
+              "name": "retrieverTool",
+              "id": "anatomy_reference_vectorstore"
+            }
+          ],
+          "maxIterations": {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number", 
+            "default": 3
+          }
+        }
+      }
+    },
+
+    "data_collector_worker": {
+      "id": "data-collector-worker",
+      "name": "Data Collection Agent",
+      "type": "multiAgentWorker",
+      "position": [100, 500],
+      "data": {
+        "label": "Data Collector",
+        "name": "multiAgentWorker",
+        "version": 1.0,
+        "description": "Specialized in web scraping and data collection",
+        "inputs": {
+          "workerName": {
+            "label": "Worker Name",
+            "name": "workerName",
+            "type": "string",
+            "default": "Data_Collector"
+          },
+          "model": {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "ChatOpenAI",
+            "id": "chatopenai_datacollector"
+          },
+          "systemMessage": {
+            "label": "System Message", 
+            "name": "systemMessage",
+            "type": "string",
+            "rows": 4,
+            "default": "You are a Data Collection Specialist for fascia research.\n\nData Sources:\n- Academic databases (PubMed, Google Scholar)\n- Educational YouTube channels\n- Professional websites\n- Medical imaging databases\n- Ultrasound galleries\n\nCollection Standards:\n- Verify source credibility\n- Extract relevant metadata\n- Maintain attribution\n- Ensure data quality\n- Process for knowledge base\n\nFor each collection task:\n1. Identify target sources\n2. Configure appropriate scraping method\n3. Validate content quality\n4. Extract and structure data\n5. Prepare for knowledge base ingestion\n\nQuality Filters:\n- Peer-reviewed content preferred\n- Professional/educational sources\n- Recent publications prioritized\n- Medical accuracy verified\n- Proper attribution maintained\n\nOutput Format:\n- Structured metadata\n- Content summaries\n- Source verification\n- Quality scores\n- Processing recommendations"
+          },
+          "tools": [
+            {
+              "label": "FireCrawl Scraper",
+              "name": "customTool",
+              "id": "firecrawl_tool"
+            },
+            {
+              "label": "YouTube Extractor", 
+              "name": "customTool",
+              "id": "youtube_transcript_tool"
+            },
+            {
+              "label": "PubMed API",
+              "name": "customTool",
+              "id": "pubmed_api_tool"
+            }
+          ],
+          "maxIterations": {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "default": 6
+          }
+        }
+      }
+    },
+
+    "knowledge_manager_worker": {
+      "id": "knowledge-manager-worker",
+      "name": "Knowledge Management Agent",
+      "type": "multiAgentWorker",
+      "position": [500, 500], 
+      "data": {
+        "label": "Knowledge Manager",
+        "name": "multiAgentWorker",
+        "version": 1.0,
+        "description": "Specialized in knowledge base management and updates",
+        "inputs": {
+          "workerName": {
+            "label": "Worker Name",
+            "name": "workerName",
+            "type": "string",
+            "default": "Knowledge_Manager"
+          },
+          "model": {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "ChatOpenAI",
+            "id": "chatopenai_knowledge"
+          },
+          "systemMessage": {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "rows": 4,
+            "default": "You are a Knowledge Management Specialist maintaining the Fascia AI knowledge base.\n\nResponsibilities:\n- Process and categorize new documents\n- Update vector store collections\n- Manage metadata and indexing\n- Maintain data quality standards\n- Optimize retrieval performance\n\nKnowledge Base Structure:\n- fascia_research: Academic papers and studies\n- anatomy_trains: Tom Myers methodology\n- treatment_protocols: Clinical approaches\n- ultrasound_imaging: Medical imaging data\n- educational_content: Teaching materials\n\nProcessing Pipeline:\n1. Document validation and quality check\n2. Content extraction and cleaning\n3. Metadata enrichment\n4. Text chunking optimization\n5. Embedding generation\n6. Vector store update\n7. Search optimization\n\nQuality Standards:\n- Medical accuracy verification\n- Source credibility scoring\n- Content freshness tracking\n- Duplicate detection\n- Performance monitoring\n\nReporting:\n- Collection statistics\n- Quality metrics\n- Performance indicators\n- Update recommendations"
+          },
+          "tools": [
+            {
+              "label": "Vector Store Manager",
+              "name": "customTool",
+              "id": "vectorstore_manager_tool"
+            },
+            {
+              "label": "Document Processor",
+              "name": "customTool", 
+              "id": "document_processor_tool"
+            }
+          ],
+          "maxIterations": {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "default": 4
+          }
+        }
+      }
+    }
+  },
+
+  "chat_model_configurations": {
+    
+    "chatanthropic_supervisor": {
+      "id": "chatanthropic_supervisor",
+      "name": "Claude Supervisor Model",
+      "type": "ChatAnthropic",
+      "data": {
+        "label": "ChatAnthropic - Supervisor",
+        "name": "chatAnthropic",
+        "version": 1.0,
+        "inputs": {
+          "model": {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "options",
+            "options": [
+              {"label": "claude-3-5-sonnet-20241022", "name": "claude-3-5-sonnet-20241022"},
+              {"label": "claude-3-opus-20240229", "name": "claude-3-opus-20240229"}
+            ],
+            "default": "claude-3-5-sonnet-20241022"
+          },
+          "temperature": {
+            "label": "Temperature",
+            "name": "temperature", 
+            "type": "number",
+            "default": 0.3,
+            "step": 0.1
+          },
+          "maxTokens": {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "optional": true,
+            "default": 4096
+          },
+          "credential": {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["anthropicApi"]
+          }
+        }
+      }
+    },
+
+    "chatanthropic_research": {
+      "id": "chatanthropic_research",
+      "name": "Claude Research Model", 
+      "type": "ChatAnthropic",
+      "data": {
+        "label": "ChatAnthropic - Research",
+        "name": "chatAnthropic",
+        "version": 1.0,
+        "inputs": {
+          "model": {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "options",
+            "options": [
+              {"label": "claude-3-opus-20240229", "name": "claude-3-opus-20240229"},
+              {"label": "claude-3-5-sonnet-20241022", "name": "claude-3-5-sonnet-20241022"}
+            ],
+            "default": "claude-3-opus-20240229"
+          },
+          "temperature": {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number", 
+            "default": 0.2
+          },
+          "maxTokens": {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "default": 4096
+          },
+          "credential": {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["anthropicApi"]
+          }
+        }
+      }
+    },
+
+    "chatopenai_diagnosis": {
+      "id": "chatopenai_diagnosis",
+      "name": "GPT-4 Diagnosis Model",
+      "type": "ChatOpenAI",
+      "data": {
+        "label": "ChatOpenAI - Diagnosis",
+        "name": "chatOpenAI",
+        "version": 3.0,
+        "inputs": {
+          "model": {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "options",
+            "options": [
+              {"label": "gpt-4-turbo", "name": "gpt-4-turbo"},
+              {"label": "gpt-4o", "name": "gpt-4o"}
+            ],
+            "default": "gpt-4-turbo"
+          },
+          "temperature": {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "default": 0.1
+          },
+          "maxTokens": {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "default": 2048
+          },
+          "credential": {
+            "label": "Connect Credential",
+            "name": "credential", 
+            "type": "credential",
+            "credentialNames": ["openAIApi"]
+          }
+        }
+      }
+    },
+
+    "chatgoogle_vision": {
+      "id": "chatgoogle_vision",
+      "name": "Gemini Vision Model",
+      "type": "ChatGoogleGenerativeAI",
+      "data": {
+        "label": "ChatGoogleGenerativeAI - Vision",
+        "name": "chatGoogleGenerativeAI",
+        "version": 1.0,
+        "inputs": {
+          "model": {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "options",
+            "options": [
+              {"label": "gemini-pro-vision", "name": "gemini-pro-vision"},
+              {"label": "gemini-1.5-pro", "name": "gemini-1.5-pro"}
+            ],
+            "default": "gemini-pro-vision"
+          },
+          "temperature": {
+            "label": "Temperature", 
+            "name": "temperature",
+            "type": "number",
+            "default": 0.4
+          },
+          "maxOutputTokens": {
+            "label": "Max Output Tokens",
+            "name": "maxOutputTokens",
+            "type": "number",
+            "default": 2048
+          },
+          "credential": {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["googleGenerativeAI"]
+          }
+        }
+      }
+    }
+  },
+
+  "memory_configurations": {
+    
+    "memory_supervisor": {
+      "id": "memory_supervisor",
+      "name": "Supervisor Memory",
+      "type": "ConversationSummaryBufferMemory",
+      "data": {
+        "label": "Conversation Summary Buffer Memory",
+        "name": "conversationSummaryBufferMemory", 
+        "version": 1.0,
+        "inputs": {
+          "model": {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "ChatOpenAI",
+            "id": "memory_chat_model"
+          },
+          "maxTokenLimit": {
+            "label": "Max Token Limit",
+            "name": "maxTokenLimit",
+            "type": "number",
+            "default": 2000
+          },
+          "returnMessages": {
+            "label": "Return Messages", 
+            "name": "returnMessages",
+            "type": "boolean",
+            "default": true
+          },
+          "memoryKey": {
+            "label": "Memory Key",
+            "name": "memoryKey",
+            "type": "string",
+            "default": "chat_history"
+          }
+        }
+      }
+    }
+  },
+
+  "tool_configurations": {
+    
+    "vectorstore_research": {
+      "id": "vectorstore_research",
+      "name": "Research Vector Store Tool",
+      "type": "retrieverTool",
+      "data": {
+        "label": "Retriever Tool - Research",
+        "name": "retrieverTool",
+        "version": 1.0,
+        "inputs": {
+          "name": {
+            "label": "Tool Name",
+            "name": "name",
+            "type": "string",
+            "default": "fascia_research_search"
+          },
+          "description": {
+            "label": "Tool Description",
+            "name": "description", 
+            "type": "string",
+            "default": "Search the comprehensive fascia research database for academic papers, studies, and clinical evidence"
+          },
+          "retriever": {
+            "label": "Vector Store Retriever",
+            "name": "retriever",
+            "type": "VectorStoreRetriever",
+            "id": "research_retriever"
+          }
+        }
+      }
+    },
+
+    "firecrawl_tool": {
+      "id": "firecrawl_tool", 
+      "name": "FireCrawl Web Scraper",
+      "type": "customTool",
+      "data": {
+        "label": "FireCrawl Tool",
+        "name": "customTool",
+        "version": 1.0,
+        "inputs": {
+          "name": {
+            "label": "Tool Name",
+            "name": "name",
+            "type": "string",
+            "default": "web_scraper"
+          },
+          "description": {
+            "label": "Tool Description",
+            "name": "description",
+            "type": "string",
+            "default": "Extract content from websites and convert to LLM-ready format"
+          },
+          "code": {
+            "label": "JavaScript Function",
+            "name": "func",
+            "type": "code",
+            "hideCodeExecute": true,
+            "default": "// FireCrawl integration for web scraping\nconst scrapeWebsite = async (url, options = {}) => {\n  const firecrawlApiKey = process.env.FIRECRAWL_API_KEY;\n  \n  const response = await fetch('https://api.firecrawl.dev/v0/scrape', {\n    method: 'POST',\n    headers: {\n      'Authorization': `Bearer ${firecrawlApiKey}`,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify({\n      url: url,\n      formats: ['markdown', 'links'],\n      includeTags: ['title', 'meta', 'article'],\n      waitFor: options.waitFor || 3000,\n      ...options\n    })\n  });\n  \n  return await response.json();\n};\n\nreturn await scrapeWebsite(url, options);"
+          }
+        }
+      }
+    },
+
+    "pubmed_search": {
+      "id": "pubmed_search",
+      "name": "PubMed Search Tool",
+      "type": "customTool",
+      "data": {
+        "label": "PubMed Search",
+        "name": "customTool",
+        "version": 1.0,
+        "inputs": {
+          "name": {
+            "label": "Tool Name",
+            "name": "name",
+            "type": "string",
+            "default": "pubmed_search"
+          },
+          "description": {
+            "label": "Tool Description",
+            "name": "description",
+            "type": "string",
+            "default": "Search PubMed database for medical research papers and studies"
+          },
+          "code": {
+            "label": "JavaScript Function",
+            "name": "func",
+            "type": "code", 
+            "default": "// PubMed API search function\nconst searchPubMed = async (query, maxResults = 20) => {\n  const baseUrl = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';\n  \n  // Search for article IDs\n  const searchUrl = `${baseUrl}esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${maxResults}&retmode=json`;\n  \n  const searchResponse = await fetch(searchUrl);\n  const searchData = await searchResponse.json();\n  \n  if (!searchData.esearchresult?.idlist?.length) {\n    return { results: [], count: 0 };\n  }\n  \n  // Fetch article details\n  const ids = searchData.esearchresult.idlist.join(',');\n  const summaryUrl = `${baseUrl}esummary.fcgi?db=pubmed&id=${ids}&retmode=json`;\n  \n  const summaryResponse = await fetch(summaryUrl);\n  const summaryData = await summaryResponse.json();\n  \n  const results = Object.values(summaryData.result).filter(item => item.uid).map(article => ({\n    pmid: article.uid,\n    title: article.title,\n    authors: article.authors?.map(a => a.name).join(', '),\n    journal: article.source,\n    pubdate: article.pubdate,\n    doi: article.elocationid?.match(/doi: (.+)/)?.[1],\n    abstract_url: `https://pubmed.ncbi.nlm.nih.gov/${article.uid}/`\n  }));\n  \n  return {\n    results,\n    count: searchData.esearchresult.count,\n    query: query\n  };\n};\n\nreturn await searchPubMed(query, maxResults);"
+          }
+        }
+      }
+    },
+
+    "youtube_transcript_tool": {
+      "id": "youtube_transcript_tool",
+      "name": "YouTube Transcript Extractor",
+      "type": "customTool",
+      "data": {
+        "label": "YouTube Transcript Tool",
+        "name": "customTool",
+        "version": 1.0,
+        "inputs": {
+          "name": {
+            "label": "Tool Name", 
+            "name": "name",
+            "type": "string",
+            "default": "youtube_transcript"
+          },
+          "description": {
+            "label": "Tool Description",
+            "name": "description",
+            "type": "string",
+            "default": "Extract transcripts from YouTube videos for educational content"
+          },
+          "code": {
+            "label": "JavaScript Function",
+            "name": "func",
+            "type": "code",
+            "default": "// YouTube transcript extraction\nconst extractYouTubeTranscript = async (videoUrl) => {\n  const videoId = videoUrl.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([a-zA-Z0-9_-]+)/)?.[1];\n  \n  if (!videoId) {\n    throw new Error('Invalid YouTube URL');\n  }\n  \n  // Use YouTube API to get video details\n  const apiKey = process.env.YOUTUBE_API_KEY;\n  const videoInfoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`;\n  \n  const videoResponse = await fetch(videoInfoUrl);\n  const videoData = await videoResponse.json();\n  \n  if (!videoData.items?.length) {\n    throw new Error('Video not found');\n  }\n  \n  const video = videoData.items[0];\n  \n  // Note: For actual transcript extraction, you would need a separate service\n  // This is a placeholder that would integrate with a transcript service\n  \n  return {\n    videoId: videoId,\n    title: video.snippet.title,\n    channel: video.snippet.channelTitle,\n    description: video.snippet.description,\n    publishedAt: video.snippet.publishedAt,\n    transcript: 'Transcript extraction requires additional service integration',\n    url: videoUrl\n  };\n};\n\nreturn await extractYouTubeTranscript(videoUrl);"
+          }
+        }
+      }
+    },
+
+    "gemini_image_tool": {
+      "id": "gemini_image_tool",
+      "name": "Gemini Image Generator",
+      "type": "customTool",
+      "data": {
+        "label": "Gemini Image Tool",
+        "name": "customTool",
+        "version": 1.0,
+        "inputs": {
+          "name": {
+            "label": "Tool Name",
+            "name": "name",
+            "type": "string",
+            "default": "generate_anatomical_image"
+          },
+          "description": {
+            "label": "Tool Description",
+            "name": "description",
+            "type": "string",
+            "default": "Generate anatomical diagrams and fascia visualizations using Gemini"
+          },
+          "code": {
+            "label": "JavaScript Function",
+            "name": "func",
+            "type": "code",
+            "default": "// Gemini image generation for anatomical diagrams\nconst generateAnatomicalImage = async (prompt, imageSpecs = {}) => {\n  const apiKey = process.env.GOOGLE_API_KEY;\n  \n  const enhancedPrompt = `Create a medically accurate anatomical diagram: ${prompt}\n\nRequirements:\n- Medical illustration style\n- Accurate anatomical proportions\n- Clear labeling with anatomical terms\n- Educational quality suitable for healthcare professionals\n- Standard anatomical color coding\n- Professional presentation\n\nStyle: Clean, educational medical illustration\nQuality: High resolution, detailed\nLabeling: Include relevant anatomical terminology`;\n  \n  const requestBody = {\n    contents: [{\n      parts: [{\n        text: enhancedPrompt\n      }]\n    }],\n    generationConfig: {\n      temperature: 0.2,\n      topK: 40,\n      topP: 0.95,\n      maxOutputTokens: 1024,\n    }\n  };\n  \n  const response = await fetch(\n    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,\n    {\n      method: 'POST',\n      headers: {\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify(requestBody)\n    }\n  );\n  \n  const data = await response.json();\n  \n  return {\n    prompt: enhancedPrompt,\n    response: data.candidates?.[0]?.content?.parts?.[0]?.text,\n    metadata: {\n      created: new Date().toISOString(),\n      model: 'gemini-pro',\n      type: 'anatomical_diagram',\n      ...imageSpecs\n    }\n  };\n};\n\nreturn await generateAnatomicalImage(prompt, imageSpecs);"
+          }
+        }
+      }
+    }
+  }
+} 

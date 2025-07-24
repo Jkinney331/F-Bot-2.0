@@ -1,0 +1,449 @@
+# Enhanced Docker Compose for F-Bot 2.0
+# Comprehensive deployment with advanced features and monitoring
+
+version: '3.8'
+
+services:
+  # Main Flowise application with queue mode support
+  flowise:
+    image: flowiseai/flowise:latest
+    restart: unless-stopped
+    environment:
+      - DATABASE_TYPE=postgres
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=flowise_fascia_bot
+      - DATABASE_USER=${DB_USER:-flowise}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_SSL=false
+      
+      # Redis for session management and queuing
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      
+      # Flowise configuration
+      - FLOWISE_USERNAME=${ADMIN_USERNAME:-admin}
+      - FLOWISE_PASSWORD=${ADMIN_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - APIKEY_PATH=/opt/flowise/api_keys
+      - LOG_LEVEL=info
+      - LOG_PATH=/opt/flowise/logs
+      
+      # Queue mode for scalability
+      - QUEUE_MODE=true
+      - QUEUE_REDIS_HOST=redis
+      - QUEUE_REDIS_PORT=6379
+      - QUEUE_REDIS_PASSWORD=${REDIS_PASSWORD}
+      
+      # API Keys for external services
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - PUBMED_EMAIL=${PUBMED_EMAIL}
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      - CROSSREF_EMAIL=${CROSSREF_EMAIL}
+      
+      # Qdrant configuration
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      
+      # Performance optimization
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - FLOWISE_FILE_SIZE_LIMIT=50mb
+      
+      # HIPAA Compliance
+      - ENABLE_AUDIT_LOGS=true
+      - DATA_ENCRYPTION_KEY=${DATA_ENCRYPTION_KEY}
+      - SESSION_TIMEOUT=900
+      - SECURE_COOKIES=true
+      
+      # Enhanced features
+      - ENABLE_TOOL_CALLING=true
+      - ENABLE_STREAMING=true
+      - ENABLE_CHAT_HISTORY=true
+      - MAX_CHAT_HISTORY=100
+      
+    ports:
+      - "3000:3000"
+    volumes:
+      - flowise_data:/opt/flowise/.flowise
+      - flowise_logs:/opt/flowise/logs
+      - api_keys:/opt/flowise/api_keys
+      - generated_images:/opt/flowise/uploads/images
+      - ./flowise-config:/opt/flowise/config:ro
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+    networks:
+      - fascia_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowise.rule=Host(`fascia-bot.local`)"
+      - "traefik.http.services.flowise.loadbalancer.server.port=3000"
+
+  # Flowise worker for queue processing
+  flowise-worker:
+    image: flowiseai/flowise:latest
+    restart: unless-stopped
+    command: ["npm", "run", "start:worker"]
+    environment:
+      - DATABASE_TYPE=postgres
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=flowise_fascia_bot
+      - DATABASE_USER=${DB_USER:-flowise}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      
+      - QUEUE_MODE=true
+      - QUEUE_REDIS_HOST=redis
+      - QUEUE_REDIS_PORT=6379
+      - QUEUE_REDIS_PASSWORD=${REDIS_PASSWORD}
+      
+      # API Keys (same as main service)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - PUBMED_EMAIL=${PUBMED_EMAIL}
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - LOG_LEVEL=info
+    volumes:
+      - flowise_data:/opt/flowise/.flowise
+      - flowise_logs:/opt/flowise/logs
+      - ./flowise-config:/opt/flowise/config:ro
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+    networks:
+      - fascia_network
+    deploy:
+      replicas: 2
+
+  # PostgreSQL database with optimizations
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=flowise_fascia_bot
+      - POSTGRES_USER=${DB_USER:-flowise}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --locale=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.7
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+    networks:
+      - fascia_network
+    labels:
+      - "traefik.enable=false"
+
+  # Qdrant vector database
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    restart: unless-stopped
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__LOG_LEVEL=INFO
+      - QDRANT__STORAGE__OPTIMIZERS__MEMMAP_THRESHOLD=50000
+      - QDRANT__STORAGE__OPTIMIZERS__INDEXING_THRESHOLD=20000
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+      - ./qdrant-config:/qdrant/config
+    networks:
+      - fascia_network
+    labels:
+      - "traefik.enable=false"
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis_data:/data
+    networks:
+      - fascia_network
+    labels:
+      - "traefik.enable=false"
+
+  # Local Ollama for privacy-sensitive processing
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+      - OLLAMA_MODELS=/root/.ollama/models
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - fascia_network
+    labels:
+      - "traefik.enable=false"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Analytics and monitoring dashboard
+  analytics-api:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-flowise}:${DB_PASSWORD}@postgres:5432/flowise_fascia_bot
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_ANALYTICS_ID=${GA4_MEASUREMENT_ID}
+      - API_PORT=3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - analytics_logs:/app/logs
+      - ./analytics-config:/app/config:ro
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - fascia_network
+
+  # Web scraping service
+  scraper-service:
+    build:
+      context: ./scraper-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - PUBMED_EMAIL=${PUBMED_EMAIL}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      - CROSSREF_EMAIL=${CROSSREF_EMAIL}
+      - SCRAPE_INTERVAL=3600 # 1 hour
+      - MAX_CONCURRENT_SCRAPES=5
+    volumes:
+      - scraper_data:/app/data
+      - scraper_logs:/app/logs
+    depends_on:
+      - redis
+    networks:
+      - fascia_network
+
+  # Reverse proxy and load balancer
+  traefik:
+    image: traefik:v3.0
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_data:/data
+      - ./traefik-config:/etc/traefik:ro
+    networks:
+      - fascia_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.fascia-bot.local`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - fascia_network
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3030:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - fascia_network
+
+  # Log aggregation with Loki
+  loki:
+    image: grafana/loki:2.9.0
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - fascia_network
+
+  # Backup service
+  backup-service:
+    build:
+      context: ./backup-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-flowise}:${DB_PASSWORD}@postgres:5432/flowise_fascia_bot
+      - QDRANT_URL=http://qdrant:6333
+      - BACKUP_SCHEDULE=0 2 * * * # Daily at 2 AM
+      - BACKUP_RETENTION_DAYS=30
+      - S3_BUCKET=${BACKUP_S3_BUCKET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - backup_data:/app/backups
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - postgres
+      - qdrant
+    networks:
+      - fascia_network
+
+volumes:
+  flowise_data:
+    driver: local
+  flowise_logs:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  qdrant_data:
+    driver: local
+  ollama_data:
+    driver: local
+  analytics_logs:
+    driver: local
+  scraper_data:
+    driver: local
+  scraper_logs:
+    driver: local
+  traefik_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+  backup_data:
+    driver: local
+  api_keys:
+    driver: local
+  generated_images:
+    driver: local
+
+networks:
+  fascia_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Health checks and resource limits
+x-healthcheck-defaults: &healthcheck-defaults
+  start_period: 30s
+  interval: 30s
+  timeout: 10s
+  retries: 3
+
+# Resource constraints for production
+x-resource-defaults: &resource-defaults
+  deploy:
+    resources:
+      limits:
+        memory: 2G
+        cpus: '1.0'
+      reservations:
+        memory: 512M
+        cpus: '0.25' 

@@ -1,0 +1,752 @@
+{
+  "fasciaAI_MasterWorkflow": {
+    "name": "Fascia AI - Ultimate Multi-Agent Chatbot",
+    "description": "Comprehensive Fascia AI chatbot with multi-LLM support, research capabilities, and specialized medical knowledge",
+    "version": "2.0",
+    "architecture": "Multi-Agent with Supervisor",
+    "compliance": ["HIPAA", "GDPR"],
+    "components": {
+      
+      "1_supervisor_orchestrator": {
+        "node_type": "Multi-Agent Supervisor",
+        "name": "Fascia_AI_Supervisor",
+        "description": "Central orchestrator managing all specialized agents",
+        "chat_model": {
+          "primary": "ChatAnthropic",
+          "model": "claude-3.5-sonnet",
+          "temperature": 0.3,
+          "max_tokens": 4096,
+          "system_message": "You are the Fascia AI Supervisor, a specialized medical AI coordinating expert agents in fascia research and treatment. Route queries to appropriate specialists: Research Agent for studies, Diagnosis Agent for assessment, Treatment Agent for protocols, Image Agent for visualizations, and Scraping Agent for data collection. Always maintain HIPAA compliance and provide evidence-based responses with proper medical disclaimers."
+        },
+        "fallback_models": ["ChatOpenAI", "ChatGoogleGenerativeAI"],
+        "memory": {
+          "type": "Conversation Summary Buffer Memory",
+          "max_token_limit": 2000,
+          "return_messages": true
+        },
+        "workers": [
+          "Research_Specialist_Agent",
+          "Diagnosis_Assessment_Agent", 
+          "Treatment_Protocol_Agent",
+          "Image_Generation_Agent",
+          "Data_Scraping_Agent",
+          "Knowledge_Management_Agent"
+        ],
+        "routing_logic": {
+          "research_queries": "Research_Specialist_Agent",
+          "diagnosis_assessment": "Diagnosis_Assessment_Agent",
+          "treatment_protocols": "Treatment_Protocol_Agent",
+          "image_requests": "Image_Generation_Agent",
+          "data_collection": "Data_Scraping_Agent",
+          "knowledge_updates": "Knowledge_Management_Agent"
+        }
+      },
+
+      "2_research_specialist_agent": {
+        "node_type": "Multi-Agent Worker",
+        "name": "Research_Specialist_Agent",
+        "description": "Specialized in fascia research, academic papers, and evidence synthesis",
+        "chat_model": {
+          "primary": "ChatAnthropic",
+          "model": "claude-3-opus",
+          "temperature": 0.2,
+          "system_message": "You are a Fascia Research Specialist with expertise in both Eastern and Western medicine. Analyze research papers, synthesize findings, and provide evidence-based insights about fascia, myofascial release, and connective tissue health. Always cite sources and indicate evidence strength levels (high, moderate, low confidence)."
+        },
+        "tools": [
+          "pubmed_search_tool",
+          "knowledge_base_retriever",
+          "research_quality_validator",
+          "citation_generator"
+        ],
+        "knowledge_sources": [
+          "fascia_research_vectorstore",
+          "anatomy_trains_knowledge",
+          "eastern_medicine_knowledge",
+          "clinical_studies_database"
+        ]
+      },
+
+      "3_diagnosis_assessment_agent": {
+        "node_type": "Multi-Agent Worker", 
+        "name": "Diagnosis_Assessment_Agent",
+        "description": "Analyzes symptoms and provides fascia-related assessment guidance",
+        "chat_model": {
+          "primary": "ChatOpenAI",
+          "model": "gpt-4-turbo",
+          "temperature": 0.1,
+          "system_message": "You are a Fascia Diagnostic Assistant specializing in myofascial assessment. Help identify potential fascia-related issues based on symptoms, pain patterns, and movement restrictions. ALWAYS include medical disclaimers and recommend professional consultation. Focus on fascia and related structures only."
+        },
+        "tools": [
+          "symptom_analyzer",
+          "pain_pattern_mapper",
+          "anatomy_trains_analyzer",
+          "differential_diagnosis_tool"
+        ],
+        "safety_protocols": [
+          "medical_disclaimer_enforcer",
+          "scope_limiter_fascia_only",
+          "professional_referral_suggester"
+        ]
+      },
+
+      "4_treatment_protocol_agent": {
+        "node_type": "Multi-Agent Worker",
+        "name": "Treatment_Protocol_Agent", 
+        "description": "Provides evidence-based fascia treatment protocols and techniques",
+        "chat_model": {
+          "primary": "ChatAnthropic",
+          "model": "claude-3.5-sonnet",
+          "temperature": 0.3,
+          "system_message": "You are a Fascia Treatment Specialist providing evidence-based treatment protocols for myofascial issues. Combine Western medical approaches with complementary Eastern techniques. Always specify contraindications, safety considerations, and recommend professional guidance for implementation."
+        },
+        "tools": [
+          "treatment_protocol_database",
+          "contraindication_checker", 
+          "technique_video_retriever",
+          "eastern_western_bridge_tool"
+        ],
+        "knowledge_sources": [
+          "treatment_protocols_vectorstore",
+          "technique_demonstrations",
+          "contraindications_database",
+          "professional_guidelines"
+        ]
+      },
+
+      "5_image_generation_agent": {
+        "node_type": "Multi-Agent Worker",
+        "name": "Image_Generation_Agent",
+        "description": "Creates anatomical diagrams and fascia visualizations",
+        "chat_model": {
+          "primary": "ChatGoogleGenerativeAI",
+          "model": "gemini-pro-vision",
+          "temperature": 0.4,
+          "system_message": "You are a Medical Visualization Specialist creating accurate anatomical diagrams of fascia and related structures. Generate medically accurate, educational images showing fascia lines, anatomical relationships, and treatment points. Include proper anatomical terminology and color coding."
+        },
+        "tools": [
+          "gemini_image_generator",
+          "anatomy_validator",
+          "medical_accuracy_checker",
+          "educational_annotator"
+        ],
+        "image_parameters": {
+          "style": "medical_educational",
+          "accuracy_level": "professional",
+          "color_coding": "anatomical_standard",
+          "annotations": "enabled"
+        }
+      },
+
+      "6_data_scraping_agent": {
+        "node_type": "Multi-Agent Worker",
+        "name": "Data_Scraping_Agent",
+        "description": "Collects and processes data from research sources and educational content",
+        "chat_model": {
+          "primary": "ChatOpenAI",
+          "model": "gpt-4-turbo",
+          "temperature": 0.2,
+          "system_message": "You are a Data Collection Specialist for fascia research. Extract, validate, and process academic content, YouTube educational videos, and medical databases. Ensure data quality and proper attribution for all collected information."
+        },
+        "tools": [
+          "firecrawl_web_scraper",
+          "youtube_transcript_extractor", 
+          "pubmed_api_connector",
+          "clarius_ultrasound_scraper",
+          "data_quality_validator"
+        ],
+        "data_sources": {
+          "academic": ["PubMed", "Google Scholar", "Research Gate"],
+          "educational": ["Anatomy Trains YouTube", "Tom Myers Content", "Fascia Research Society"],
+          "clinical": ["Clarius Ultrasound Gallery", "Medical Imaging Databases"],
+          "web": ["Professional Websites", "Medical Journals", "Educational Platforms"]
+        }
+      },
+
+      "7_knowledge_management_agent": {
+        "node_type": "Multi-Agent Worker",
+        "name": "Knowledge_Management_Agent",
+        "description": "Manages vector databases and knowledge base updates",
+        "chat_model": {
+          "primary": "ChatOpenAI",
+          "model": "gpt-4-turbo",
+          "temperature": 0.1,
+          "system_message": "You are a Knowledge Management Specialist maintaining the Fascia AI knowledge base. Process new information, update vector stores, manage document classification, and ensure knowledge base integrity and accessibility."
+        },
+        "tools": [
+          "vector_store_manager",
+          "document_processor",
+          "knowledge_base_updater",
+          "metadata_enricher"
+        ]
+      }
+    },
+
+    "knowledge_infrastructure": {
+      
+      "document_stores": {
+        "fascia_research_store": {
+          "name": "Fascia Research Papers",
+          "description": "Academic research papers on fascia and myofascial topics",
+          "document_loader": {
+            "type": "Multiple Loaders",
+            "sources": ["PDF Files", "PubMed API", "Web Scraper"]
+          },
+          "text_splitter": {
+            "type": "Recursive Character Text Splitter",
+            "chunk_size": 1000,
+            "chunk_overlap": 200,
+            "separators": ["\\n\\n", "\\n", ". ", " "]
+          },
+          "embeddings": {
+            "primary": "OpenAI Embeddings",
+            "model": "text-embedding-3-large",
+            "dimensions": 3072
+          },
+          "vector_store": {
+            "type": "Qdrant",
+            "collection": "fascia_research",
+            "distance_metric": "cosine"
+          },
+          "metadata_schema": {
+            "required": ["title", "authors", "publication_date", "journal", "doi"],
+            "optional": ["impact_factor", "study_type", "sample_size", "fascia_relevance_score", "eastern_western_bridge"]
+          }
+        },
+
+        "anatomy_trains_store": {
+          "name": "Anatomy Trains Knowledge Base",
+          "description": "Tom Myers Anatomy Trains methodology and related content",
+          "document_loader": {
+            "type": "Multiple Loaders", 
+            "sources": ["YouTube Transcript", "PDF Files", "Web Scraper"]
+          },
+          "text_splitter": {
+            "type": "Recursive Character Text Splitter",
+            "chunk_size": 800,
+            "chunk_overlap": 150
+          },
+          "embeddings": {
+            "primary": "OpenAI Embeddings",
+            "model": "text-embedding-3-large"
+          },
+          "vector_store": {
+            "type": "Qdrant",
+            "collection": "anatomy_trains",
+            "distance_metric": "cosine"
+          }
+        },
+
+        "treatment_protocols_store": {
+          "name": "Treatment Protocols Database",
+          "description": "Evidence-based treatment protocols and techniques",
+          "document_loader": {
+            "type": "Multiple Loaders",
+            "sources": ["PDF Files", "Web Scraper", "Manual Upload"]
+          },
+          "text_splitter": {
+            "type": "Recursive Character Text Splitter", 
+            "chunk_size": 1200,
+            "chunk_overlap": 250
+          },
+          "embeddings": {
+            "primary": "OpenAI Embeddings",
+            "model": "text-embedding-3-large"
+          },
+          "vector_store": {
+            "type": "Qdrant",
+            "collection": "treatment_protocols"
+          },
+          "metadata_schema": {
+            "required": ["technique_name", "indication", "contraindications", "evidence_level"],
+            "optional": ["difficulty_level", "training_required", "equipment_needed"]
+          }
+        },
+
+        "ultrasound_imaging_store": {
+          "name": "Ultrasound Imaging Database", 
+          "description": "Clarius ultrasound images and related educational content",
+          "document_loader": {
+            "type": "Multiple Loaders",
+            "sources": ["Web Scraper", "Image Processor", "API Connector"]
+          },
+          "embeddings": {
+            "primary": "Google GenerativeAI Embeddings",
+            "model": "embedding-001"
+          },
+          "vector_store": {
+            "type": "Qdrant",
+            "collection": "ultrasound_images"
+          },
+          "image_processing": {
+            "enabled": true,
+            "ocr_extraction": true,
+            "image_analysis": "gemini-pro-vision"
+          }
+        }
+      },
+
+      "web_scraping_workflows": {
+        
+        "pubmed_research_scraper": {
+          "name": "PubMed Research Collector",
+          "description": "Automated collection of fascia research from PubMed",
+          "trigger": {
+            "type": "Schedule",
+            "frequency": "daily",
+            "time": "02:00"
+          },
+          "document_loader": {
+            "type": "Custom API Loader",
+            "endpoint": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
+            "search_terms": [
+              "fascia AND myofascial",
+              "connective tissue AND pain",
+              "fascial manipulation",
+              "myofascial release",
+              "anatomy trains",
+              "tensegrity AND fascia"
+            ],
+            "rate_limit": "3_requests_per_second",
+            "max_results": 100
+          },
+          "data_processing": {
+            "quality_filter": "peer_reviewed_only",
+            "date_range": "last_2_years",
+            "language": "english_spanish",
+            "impact_factor_minimum": 1.0
+          },
+          "output_destination": "fascia_research_store"
+        },
+
+        "youtube_educational_scraper": {
+          "name": "YouTube Educational Content Collector",
+          "description": "Collects transcripts from educational fascia content",
+          "trigger": {
+            "type": "Manual",
+            "schedule_option": "weekly"
+          },
+          "document_loader": {
+            "type": "Custom Tool",
+            "tool_name": "YouTube Transcript Extractor",
+            "target_channels": [
+              "Anatomy Trains",
+              "Tom Myers",
+              "Fascia Research Society", 
+              "KineticsVideo",
+              "3DMuscleMap"
+            ],
+            "search_keywords": [
+              "fascia anatomy",
+              "myofascial release",
+              "connective tissue",
+              "manual therapy",
+              "structural integration"
+            ]
+          },
+          "content_filter": {
+            "min_duration": "5_minutes",
+            "max_duration": "120_minutes",
+            "quality_threshold": "educational_professional",
+            "exclude_promotional": true
+          },
+          "output_destination": "anatomy_trains_store"
+        },
+
+        "clarius_ultrasound_scraper": {
+          "name": "Clarius Ultrasound Gallery Scraper",
+          "description": "Collects ultrasound images and educational content from Clarius",
+          "trigger": {
+            "type": "Manual",
+            "schedule_option": "weekly"
+          },
+          "document_loader": {
+            "type": "FireCrawl",
+            "start_urls": [
+              "https://clarius.com/about/clinical-gallery/?filter_ultrasound_category=l20",
+              "https://clarius.com/classroom/"
+            ],
+            "crawl_options": {
+              "max_depth": 3,
+              "max_pages": 50,
+              "wait_for": "networkidle",
+              "include_images": true
+            }
+          },
+          "image_processing": {
+            "extract_metadata": true,
+            "ocr_enabled": true,
+            "analysis_model": "gemini-pro-vision"
+          },
+          "output_destination": "ultrasound_imaging_store"
+        },
+
+        "web_research_scraper": {
+          "name": "General Web Research Scraper",
+          "description": "Collects fascia-related content from professional websites",
+          "trigger": {
+            "type": "Manual"
+          },
+          "document_loader": {
+            "type": "Playwright Web Scraper",
+            "target_domains": [
+              "fasciaresearchsociety.org",
+              "rolfing.org", 
+              "anatomytrains.com",
+              "myofascialrelease.com",
+              "ida-rolf.org"
+            ],
+            "crawler_options": {
+              "wait_until": "networkidle",
+              "max_pages_per_domain": 20,
+              "respect_robots_txt": true
+            }
+          },
+          "content_validation": {
+            "medical_accuracy_check": true,
+            "source_credibility_score": "minimum_7",
+            "content_freshness": "last_3_years"
+          },
+          "output_destination": "fascia_research_store"
+        }
+      }
+    },
+
+    "model_management": {
+      
+      "model_router": {
+        "name": "Multi-LLM Router",
+        "description": "Intelligent routing between different LLM providers based on task and cost optimization",
+        "routing_strategy": {
+          "research_synthesis": {
+            "primary": "claude-3-opus",
+            "fallback": ["gpt-4-turbo", "claude-3.5-sonnet"],
+            "reason": "Best for complex reasoning and academic analysis"
+          },
+          "image_generation": {
+            "primary": "gemini-pro-vision",
+            "fallback": ["gpt-4-vision", "claude-3-opus"],
+            "reason": "Multimodal capabilities for medical imagery"
+          },
+          "diagnosis_assessment": {
+            "primary": "gpt-4-turbo",
+            "fallback": ["claude-3.5-sonnet", "claude-3-opus"],
+            "reason": "Excellent for structured medical reasoning"
+          },
+          "data_processing": {
+            "primary": "claude-3.5-sonnet",
+            "fallback": ["gpt-4-turbo", "gpt-3.5-turbo"],
+            "reason": "Cost-effective for processing tasks"
+          },
+          "general_chat": {
+            "primary": "claude-3.5-sonnet",
+            "fallback": ["gpt-4-turbo", "gpt-3.5-turbo"],
+            "reason": "Balance of capability and cost"
+          }
+        },
+        "cost_optimization": {
+          "track_usage": true,
+          "budget_limits": {
+            "daily": 100,
+            "monthly": 2000
+          },
+          "fallback_on_limit": "cheaper_model"
+        }
+      },
+
+      "performance_monitoring": {
+        "metrics_tracking": {
+          "response_time": true,
+          "token_usage": true,
+          "cost_per_query": true,
+          "user_satisfaction": true,
+          "accuracy_score": true
+        },
+        "quality_assessment": {
+          "medical_accuracy_validator": true,
+          "citation_checker": true,
+          "safety_compliance": true,
+          "disclaimer_enforcer": true
+        }
+      }
+    },
+
+    "retrieval_system": {
+      
+      "advanced_rag": {
+        "name": "Multi-Domain RAG Pipeline",
+        "description": "Sophisticated retrieval system with domain-specific optimization",
+        "query_classification": {
+          "enabled": true,
+          "categories": [
+            "research_query",
+            "diagnostic_assistance", 
+            "treatment_protocol",
+            "anatomical_question",
+            "educational_content"
+          ]
+        },
+        "retrieval_strategies": {
+          "research_query": {
+            "top_k": 15,
+            "similarity_threshold": 0.75,
+            "reranking": true,
+            "cross_domain_synthesis": true,
+            "evidence_weighting": "impact_factor"
+          },
+          "diagnostic_assistance": {
+            "top_k": 10,
+            "similarity_threshold": 0.8,
+            "safety_filter": true,
+            "professional_validation": true,
+            "disclaimer_injection": true
+          },
+          "treatment_protocol": {
+            "top_k": 12,
+            "similarity_threshold": 0.78,
+            "contraindication_check": true,
+            "evidence_grading": true,
+            "eastern_western_balance": true
+          }
+        },
+        "reranking": {
+          "enabled": true,
+          "model": "Cohere Rerank",
+          "boost_factors": {
+            "peer_reviewed": 1.5,
+            "recent_publication": 1.3,
+            "high_impact_factor": 1.4,
+            "clinical_trial": 1.6
+          }
+        }
+      }
+    },
+
+    "safety_compliance": {
+      
+      "hipaa_compliance": {
+        "data_encryption": "AES-256",
+        "audit_logging": true,
+        "access_controls": "role_based",
+        "data_retention": "7_years_medical_records",
+        "breach_notification": "automated"
+      },
+      
+      "medical_safety": {
+        "disclaimer_enforcer": {
+          "enabled": true,
+          "trigger_conditions": [
+            "diagnosis_request",
+            "treatment_advice",
+            "medical_interpretation"
+          ],
+          "disclaimer_text": "This information is for educational purposes only and does not constitute medical advice. Always consult with qualified healthcare professionals for diagnosis and treatment decisions."
+        },
+        "scope_limiter": {
+          "enabled": true,
+          "allowed_scope": "fascia_and_related_structures",
+          "excluded_topics": [
+            "pharmaceutical_prescriptions",
+            "surgical_procedures", 
+            "emergency_medical_situations",
+            "psychiatric_conditions"
+          ]
+        },
+        "professional_referral": {
+          "enabled": true,
+          "trigger_conditions": [
+            "complex_symptoms",
+            "red_flag_indicators",
+            "beyond_fascia_scope"
+          ]
+        }
+      },
+
+      "content_moderation": {
+        "medical_accuracy_validator": true,
+        "source_credibility_checker": true,
+        "bias_detection": true,
+        "inappropriate_content_filter": true
+      }
+    },
+
+    "api_integration": {
+      
+      "external_apis": {
+        "pubmed_api": {
+          "endpoint": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
+          "rate_limit": "3_per_second",
+          "api_key_required": true
+        },
+        "youtube_api": {
+          "endpoint": "https://www.googleapis.com/youtube/v3/",
+          "rate_limit": "10000_per_day",
+          "api_key_required": true
+        },
+        "firecrawl_api": {
+          "endpoint": "https://api.firecrawl.dev/v0/",
+          "rate_limit": "subscription_based",
+          "api_key_required": true
+        },
+        "gemini_api": {
+          "endpoint": "https://generativelanguage.googleapis.com/v1beta/",
+          "rate_limit": "subscription_based",
+          "api_key_required": true
+        }
+      },
+
+      "webhook_endpoints": {
+        "chat_interface": {
+          "path": "/api/v1/fascia-chat",
+          "method": "POST",
+          "authentication": "bearer_token",
+          "rate_limit": "100_per_minute"
+        },
+        "knowledge_update": {
+          "path": "/api/v1/knowledge-update",
+          "method": "POST", 
+          "authentication": "admin_token",
+          "rate_limit": "10_per_minute"
+        },
+        "feedback_collection": {
+          "path": "/api/v1/feedback",
+          "method": "POST",
+          "authentication": "session_token",
+          "rate_limit": "20_per_minute"
+        }
+      }
+    },
+
+    "analytics_monitoring": {
+      
+      "usage_analytics": {
+        "metrics": [
+          "total_conversations",
+          "average_session_length",
+          "user_satisfaction_scores",
+          "query_types_distribution",
+          "model_usage_statistics",
+          "cost_per_interaction",
+          "response_accuracy_ratings"
+        ],
+        "dashboards": {
+          "real_time": "conversations_and_performance",
+          "daily": "usage_and_costs",
+          "weekly": "user_engagement_and_satisfaction",
+          "monthly": "business_metrics_and_roi"
+        }
+      },
+
+      "quality_monitoring": {
+        "medical_accuracy_tracking": true,
+        "citation_compliance": true,
+        "safety_protocol_adherence": true,
+        "user_feedback_analysis": true,
+        "error_rate_monitoring": true
+      }
+    },
+
+    "deployment_configuration": {
+      
+      "infrastructure": {
+        "platform": "flowise_cloud_or_self_hosted",
+        "scaling": "horizontal_auto_scaling",
+        "database": {
+          "vector_store": "qdrant_cloud",
+          "operational_db": "postgresql",
+          "cache": "redis",
+          "backup_strategy": "daily_automated"
+        },
+        "security": {
+          "ssl_certificates": "auto_renewal",
+          "firewall": "cloud_native",
+          "monitoring": "24_7_automated"
+        }
+      },
+
+      "environment_variables": {
+        "required": [
+          "OPENAI_API_KEY",
+          "ANTHROPIC_API_KEY", 
+          "GOOGLE_API_KEY",
+          "FIRECRAWL_API_KEY",
+          "QDRANT_API_KEY",
+          "DATABASE_URL",
+          "REDIS_URL"
+        ],
+        "optional": [
+          "YOUTUBE_API_KEY",
+          "PUBMED_API_KEY",
+          "MONITORING_WEBHOOK_URL"
+        ]
+      }
+    }
+  },
+
+  "implementation_phases": {
+    
+    "phase_1_foundation": {
+      "duration": "2_weeks",
+      "deliverables": [
+        "Core supervisor and worker agent setup",
+        "Basic chat interface with Claude/OpenAI",
+        "Initial knowledge base with manual uploads",
+        "Simple RAG system with Qdrant",
+        "Basic HIPAA compliance measures"
+      ]
+    },
+
+    "phase_2_knowledge_systems": {
+      "duration": "3_weeks", 
+      "deliverables": [
+        "Automated PubMed scraping workflow",
+        "YouTube transcript extraction",
+        "Document processing pipeline",
+        "Advanced RAG with reranking",
+        "Medical safety protocols"
+      ]
+    },
+
+    "phase_3_advanced_features": {
+      "duration": "3_weeks",
+      "deliverables": [
+        "Multi-LLM routing system",
+        "Image generation with Gemini",
+        "Clarius ultrasound scraping",
+        "Advanced analytics dashboard",
+        "API endpoints for external integration"
+      ]
+    },
+
+    "phase_4_optimization": {
+      "duration": "2_weeks",
+      "deliverables": [
+        "Performance optimization",
+        "Cost management system",
+        "Quality assurance automation",
+        "Production deployment",
+        "User training and documentation"
+      ]
+    }
+  },
+
+  "success_metrics": {
+    "technical": {
+      "response_time": "< 5 seconds average",
+      "accuracy_rate": "> 85% validated responses",
+      "uptime": "> 99.5% availability",
+      "cost_efficiency": "< $0.50 per conversation"
+    },
+    "medical": {
+      "diagnostic_assistance_satisfaction": "> 80%",
+      "treatment_protocol_adherence": "> 90%", 
+      "safety_compliance": "100%",
+      "professional_validation": "> 85% expert approval"
+    },
+    "business": {
+      "user_engagement": "> 75% return users",
+      "session_duration": "> 8 minutes average",
+      "knowledge_base_growth": "10% monthly increase",
+      "revenue_target": "subscription_model_viability"
+    }
+  }
+} 

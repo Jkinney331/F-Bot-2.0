@@ -1,0 +1,131 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+secrets/
+config/secrets/
+
+# Logs
+logs/
+*.log
+combined.log
+error.log
+debug.log
+flowise.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+docker-volumes/
+
+# Database data
+data/
+postgres-data/
+qdrant-data/
+redis-data/
+backups/
+
+# Flowise specific
+flowise-data/
+flowise-uploads/
+flowise-storage/
+.flowise/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Build outputs
+dist/
+build/
+out/
+
+# API keys and credentials
+api-keys.txt
+credentials.json
+service-account.json
+*.pem
+*.key
+*.crt
+
+# Monitoring and analytics
+prometheus-data/
+grafana-data/
+loki-data/
+
+# Backup files
+*.backup
+*.bak
+*.sql.gz
+
+# Python cache (if using Python scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Model files and large binaries
+models/
+*.bin
+*.safetensors
+*.onnx
+*.gguf
+
+# Medical imaging data (DICOM, etc.)
+medical-images/
+dicom-data/
+ultrasound-data/
+*.dcm
+
+# HIPAA compliance - exclude any patient data
+patient-data/
+phi-data/
+medical-records/
+audit-logs/
+
+# Test files with sensitive data
+test-data/patient/
+test-data/phi/
+
+# SSL certificates
+ssl/
+certs/
+*.cert
+
+# Local configuration overrides
+local-config/
+override-config/ 
