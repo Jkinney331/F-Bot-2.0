@@ -181,22 +181,37 @@ const LoginPage: React.FC = () => {
 
                                 {/* Demo Mode Notice */}
                       <div className="text-center space-y-2">
-                                                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <div className="flex items-center justify-center space-x-2">
-                              <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <span className="text-sm font-medium text-blue-800">Demo Mode Active</span>
-                            </div>
-                            <p className="text-xs text-blue-600 mt-2">
-                              Use these demo credentials to test the interface:
-                            </p>
-                            <div className="mt-3 p-2 bg-blue-100 rounded border border-blue-300">
-                              <p className="text-sm font-bold text-blue-900">Username: test@hashagency.com</p>
-                              <p className="text-sm font-bold text-blue-900">Password: password</p>
-                            </div>
-                            <div className="mt-2 text-xs text-blue-700">
-                              <p className="italic">Or use any other username/password combination</p>
-                            </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center justify-center space-x-2 mb-3">
+                            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span className="text-sm font-medium text-blue-800">Demo Mode Active</span>
                           </div>
+                          
+                          <p className="text-xs text-blue-600 mb-4">
+                            Choose credentials based on the user type you want to test:
+                          </p>
+                          
+                          {/* Admin Credentials */}
+                          <div className="mb-3 p-3 bg-purple-100 rounded border border-purple-300">
+                            <p className="text-xs font-semibold text-purple-800 mb-2">👨‍💼 Admin Access (Full Dashboard)</p>
+                            <p className="text-sm font-bold text-purple-900">Username: admin@hashagency.com</p>
+                            <p className="text-sm font-bold text-purple-900">Password: password</p>
+                            <p className="text-xs text-purple-700 mt-1 italic">Access: Chat + Admin Dashboard + Knowledge Base</p>
+                          </div>
+                          
+                          {/* User Credentials */}
+                          <div className="mb-3 p-3 bg-green-100 rounded border border-green-300">
+                            <p className="text-xs font-semibold text-green-800 mb-2">👨‍⚕️ Regular User (Chat Only)</p>
+                            <p className="text-sm font-bold text-green-900">Username: test@hashagency.com</p>
+                            <p className="text-sm font-bold text-green-900">Password: password</p>
+                            <p className="text-xs text-green-700 mt-1 italic">Access: Chat Interface Only</p>
+                          </div>
+                          
+                          <div className="mt-3 text-xs text-blue-700">
+                            <p className="italic">Or use any other username/password combination</p>
+                            <p className="text-xs text-blue-600 mt-1">(Include 'admin' in username for admin access)</p>
+                          </div>
+                        </div>
                         
                         <p className="text-xs text-gray-500">
                           By signing in, you agree to our medical terms of service
