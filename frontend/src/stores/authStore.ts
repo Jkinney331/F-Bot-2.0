@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 import { toast } from 'react-hot-toast'
 import { AuthState, User, LoginCredentials, AuthResponse } from '../types'
 import { apiService } from '../services/api'
-import { config, isDemo } from '../config/environment'
+import { isDemo } from '../config/environment'
 
 interface AuthStore extends AuthState {
   // Actions
@@ -33,9 +33,13 @@ const useAuthStore = create<AuthStore>()(
 
       // Check if demo mode is enabled
       const isDemoEnabled = isDemo()
-      const isValidDemoCredentials = (
-        credentials.username === 'test@hashagency.com' && credentials.password === 'password'
-      ) || (isDemoEnabled && config.isDevelopment)
+      
+      // Allow specific demo credentials or any credentials in demo mode
+      const isValidDemoCredentials = isDemoEnabled && (
+        (credentials.username === 'test@hashagency.com' && credentials.password === 'password') ||
+        (credentials.username === 'admin@hashagency.com' && credentials.password === 'password') ||
+        (credentials.password === 'password') // Allow any username with 'password' in demo mode
+      )
       
       if (isDemoEnabled && isValidDemoCredentials) {
         // Simulate API delay
@@ -50,17 +54,24 @@ const useAuthStore = create<AuthStore>()(
           firstName = 'Test'
           lastName = 'User'
           role = 'user'
+        } else if (credentials.username === 'admin@hashagency.com') {
+          firstName = 'Admin'
+          lastName = 'User'
+          role = 'admin'
         } else if (credentials.username.includes('@')) {
           firstName = credentials.username.split('@')[0] || 'Demo'
           lastName = 'User'
+          // Determine role from username for other emails
+          if (credentials.username.toLowerCase().includes('admin')) {
+            role = 'admin'
+          }
         } else {
           firstName = credentials.username || 'Demo'
           lastName = 'User'
-        }
-
-        // Determine role from username
-        if (credentials.username.toLowerCase().includes('admin')) {
-          role = 'admin'
+          // Determine role from username for non-email usernames
+          if (credentials.username.toLowerCase().includes('admin')) {
+            role = 'admin'
+          }
         }
 
         const mockUser: User = {
