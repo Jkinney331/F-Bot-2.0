@@ -129,3 +129,5 @@ certs/
 # Local configuration overrides
 local-config/
 override-config/ 
+# Local Netlify folder
+.netlify

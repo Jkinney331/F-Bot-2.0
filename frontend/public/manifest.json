@@ -1,0 +1,99 @@
+{
+  "name": "F-Bot 2.0 - Medical AI Assistant",
+  "short_name": "F-Bot 2.0",
+  "description": "Professional HIPAA-compliant AI assistant specializing in fascia health and medical insights",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["medical", "productivity", "education"],
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-chat.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "F-Bot Chat Interface on Desktop"
+    },
+    {
+      "src": "/screenshots/mobile-chat.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "F-Bot Chat Interface on Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "description": "Start a new medical consultation",
+      "url": "/chat?new=true",
+      "icons": [
+        {
+          "src": "/icons/chat-icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ultrasound Analysis",
+      "description": "Upload and analyze ultrasound images",
+      "url": "/chat?ultrasound=true",
+      "icons": [
+        {
+          "src": "/icons/ultrasound-icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "dir": "ltr",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+fbot",
+      "url": "/chat?q=%s"
+    }
+  ]
+} 

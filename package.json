@@ -56,7 +56,11 @@
     "docs:generate": "jsdoc src/ -d docs/api/",
     "health:check": "node scripts/health-check.js",
     "install:flowise": "./setup-scripts/install-flowise.sh",
-    "setup": "npm run install:flowise && npm run migrate && npm run seed"
+    "setup": "npm run install:flowise && npm run migrate && npm run seed",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:install": "cd frontend && npm install",
+    "start:full": "concurrently \"npm run dev\" \"npm run frontend:dev\""
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -94,7 +98,8 @@
     "anthropic": "^0.16.1",
     "google-ai": "^0.1.2",
     "langfuse": "^3.0.0",
-    "flowise-sdk": "^1.0.0"
+    "flowise-sdk": "^1.0.0",
+    "concurrently": "^8.2.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
