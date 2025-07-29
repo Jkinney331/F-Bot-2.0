@@ -60,7 +60,7 @@ export const config: AppConfig = {
   environment: isProduction ? 'production' : isDevelopment ? 'development' : 'staging',
   isDevelopment,
   isProduction,
-  demoMode: true, // Always loginless mode - no login required
+  demoMode: false, // Disable demo mode to use real Flowise API
   enableAnalytics: isProduction && getEnvVar('VITE_ENABLE_ANALYTICS', 'true') === 'true',
   enableErrorReporting: isProduction && getEnvVar('VITE_ENABLE_ERROR_REPORTING', 'true') === 'true',
   version: getEnvVar('VITE_APP_VERSION', '2.0.0'),
