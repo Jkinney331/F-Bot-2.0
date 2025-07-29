@@ -24,7 +24,7 @@ const MedicalHeader: React.FC<MedicalHeaderProps> = ({
   onSidebarToggle,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const { logout } = useAuthStore()
+  const { logout, toggleRole } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -78,6 +78,22 @@ const MedicalHeader: React.FC<MedicalHeaderProps> = ({
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
+            {/* Role Toggle Button */}
+            <button
+              onClick={toggleRole}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                user?.role === 'admin'
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+              }`}
+              title={`Switch to ${user?.role === 'admin' ? 'User' : 'Admin'} mode`}
+            >
+              <CommandLineIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {user?.role === 'admin' ? 'User Mode' : 'Admin Mode'}
+              </span>
+            </button>
+
             {/* Admin Button - Only show for admin users */}
             {user?.role === 'admin' && (
               <button

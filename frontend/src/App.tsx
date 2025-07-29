@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import useAuthStore from './stores/authStore'
-import LoginPage from './pages/LoginPage'
 import ChatPage from './pages/ChatPage'
 import AdminDashboard from './pages/AdminDashboard'
 import LoadingSpinner from './components/ui/LoadingSpinner'
@@ -31,62 +30,34 @@ function App() {
       
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
-          {/* Public Routes */}
-          <Route 
-            path="/login" 
-            element={
-              isAuthenticated ? (
-                <Navigate to="/chat" replace />
-              ) : (
-                <LoginPage />
-              )
-            } 
-          />
-          
-          {/* Protected Routes */}
+          {/* Chat Route - always accessible */}
           <Route 
             path="/chat" 
-            element={
-              isAuthenticated ? (
-                <ChatPage />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
+            element={<ChatPage />}
           />
           
-          {/* Admin Routes */}
+          {/* Admin Routes - accessible when authenticated */}
           <Route 
             path="/admin" 
             element={
               isAuthenticated ? (
                 <AdminDashboard />
               ) : (
-                <Navigate to="/login" replace />
+                <Navigate to="/chat" replace />
               )
             } 
           />
           
-          {/* Root redirect */}
+          {/* Root redirect to chat */}
           <Route 
             path="/" 
-            element={
-              <Navigate 
-                to={isAuthenticated ? "/chat" : "/login"} 
-                replace 
-              />
-            } 
+            element={<Navigate to="/chat" replace />}
           />
           
-          {/* Catch-all redirect */}
+          {/* Catch-all redirect to chat */}
           <Route 
             path="*" 
-            element={
-              <Navigate 
-                to={isAuthenticated ? "/chat" : "/login"} 
-                replace 
-              />
-            } 
+            element={<Navigate to="/chat" replace />}
           />
         </Routes>
       </AnimatePresence>

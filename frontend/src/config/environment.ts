@@ -35,7 +35,7 @@ export const config: AppConfig = {
   environment: isProduction ? 'production' : isDevelopment ? 'development' : 'staging',
   isDevelopment,
   isProduction,
-  demoMode: isDevelopment || isNetlify || getEnvVar('VITE_DEMO_MODE', 'true') === 'true', // Enable demo mode for both dev and Netlify
+  demoMode: true, // Always loginless mode - no login required
   enableAnalytics: isProduction && getEnvVar('VITE_ENABLE_ANALYTICS', 'true') === 'true',
   enableErrorReporting: isProduction && getEnvVar('VITE_ENABLE_ERROR_REPORTING', 'true') === 'true',
   version: getEnvVar('VITE_APP_VERSION', '2.0.0'),

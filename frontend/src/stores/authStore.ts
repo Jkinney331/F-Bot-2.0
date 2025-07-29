@@ -12,6 +12,7 @@ interface AuthStore extends AuthState {
   logout: () => void
   refreshAuth: () => Promise<boolean>
   updateUser: (user: Partial<User>) => void
+  toggleRole: () => void  // Add role toggle functionality
   checkTokenExpiry: () => boolean
   initialize: () => Promise<void>
 }
@@ -190,6 +191,17 @@ const useAuthStore = create<AuthStore>()(
         }
       },
 
+      toggleRole: () => {
+        const currentUser = get().user
+        if (currentUser) {
+          const newRole: 'admin' | 'user' = currentUser.role === 'admin' ? 'user' : 'admin'
+          const updatedUser = { ...currentUser, role: newRole }
+          set({ user: updatedUser })
+          localStorage.setItem('fbot_user', JSON.stringify(updatedUser))
+          toast.success(`Role toggled to ${newRole}`)
+        }
+      },
+
       checkTokenExpiry: (): boolean => {
         // Skip token expiry check in demo mode
         if (isDemo()) {
@@ -219,7 +231,42 @@ const useAuthStore = create<AuthStore>()(
         try {
           set({ isLoading: true })
 
-          // Check for stored tokens
+          // Auto-login in demo mode
+          const isDemoEnabled = isDemo()
+          if (isDemoEnabled) {
+            // Create default user automatically
+            const defaultUser: User = {
+              id: 'auto-user-123',
+              email: 'user@fbot.com',
+              firstName: 'Demo',
+              lastName: 'User',
+              role: 'user',
+              permissions: ['chat', 'ultrasound', 'medical_rag'],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            }
+
+            const mockToken = `auto-jwt-token-${Date.now()}`
+            const mockRefreshToken = `auto-refresh-token-${Date.now()}`
+
+            // Store tokens
+            localStorage.setItem('fbot_token', mockToken)
+            localStorage.setItem('fbot_refresh_token', mockRefreshToken)
+            localStorage.setItem('fbot_user', JSON.stringify(defaultUser))
+
+            set({
+              user: defaultUser,
+              token: mockToken,
+              refreshToken: mockRefreshToken,
+              isAuthenticated: true,
+              isLoading: false,
+            })
+
+            console.log('🚀 Auto-login successful in demo mode')
+            return
+          }
+
+          // Production mode - check existing tokens
           const token = localStorage.getItem('fbot_token')
           const refreshToken = localStorage.getItem('fbot_refresh_token')
           const storedUser = localStorage.getItem('fbot_user')

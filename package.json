@@ -60,10 +60,7 @@
     "frontend:dev": "cd frontend && npm run dev",
     "frontend:build": "cd frontend && npm run build",
     "frontend:install": "cd frontend && npm install",
-    "start:full": "concurrently \"npm run dev\" \"npm run frontend:dev\"",
-    "scrape:test": "node backend/scripts/test-scraping.js",
-    "scrape:medical": "node backend/scripts/scrape-medical-data.js",
-    "init-sources": "node backend/scripts/initializeMedicalSources.js"
+    "start:full": "concurrently \"npm run dev\" \"npm run frontend:dev\""
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -95,15 +92,14 @@
     "passport-local": "^1.0.0",
     "express-session": "^1.17.3",
     "connect-redis": "^7.1.0",
+    "prometheus-register": "^2.0.0",
     "prom-client": "^15.0.0",
     "openai": "^4.20.1",
+    "anthropic": "^0.16.1",
+    "google-ai": "^0.1.2",
     "langfuse": "^3.0.0",
     "flowise-sdk": "^1.0.0",
-    "concurrently": "^8.2.2",
-    "cheerio": "^1.0.0-rc.12",
-    "puppeteer": "^21.5.2",
-    "bull": "^4.12.0",
-    "sequelize": "^6.35.0"
+    "concurrently": "^8.2.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
