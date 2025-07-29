@@ -1,3 +1,28 @@
+// Environment Configuration
+export const ENV = {
+  // API Configuration
+  FLOWISE_API_URL: 'https://flowise-h06w.onrender.com/api/v1/prediction/09e81caf-5151-4748-8373-75e31493baf4',
+  FLOWISE_API_KEY: '1lwLFwmqmhWCP4Ew-Bng_7rP0d9R4mujhopekjI0uhQ',
+  
+  // Pinecone Configuration
+  PINECONE_API_KEY: 'pcsk_6yGqug_9TeXjbLDv5Tz2Mk5CTrvbpZjicVmevweSU65EZ2NwXXx1SbSpSMznBi8eEpCf4u',
+  PINECONE_INDEX: 'fascia-medical-knowledge',
+  
+  // App Configuration
+  APP_NAME: 'F-Bot 2.0',
+  APP_VERSION: '2.0.0',
+  CACHE_BUST: Date.now(), // Force cache refresh for Netlify deployment
+  
+  // Feature Flags
+  ENABLE_PINECONE: false, // Temporarily disabled until SDK is installed
+  ENABLE_ULTRASOUND: true,
+  ENABLE_ADMIN: true,
+  
+  // Security
+  HIPAA_COMPLIANT: true,
+  ENCRYPTION_ENABLED: true
+}
+
 // Environment configuration for F-Bot frontend
 export interface AppConfig {
   apiBaseUrl: string
