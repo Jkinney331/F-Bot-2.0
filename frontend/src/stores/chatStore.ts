@@ -9,6 +9,7 @@ import {
 } from '../types'
 import { apiService } from '../services/api'
 import { flowiseService } from '../services/flowiseService'
+import { flowiseProxy } from '../services/flowiseProxy'
 import { isDemo } from '../config/environment'
 
 interface ChatStore extends ChatState {
@@ -187,8 +188,32 @@ const useChatStore = create<ChatStore>((set, get) => ({
         ...options,
       }
 
-      // Get response from Flowise (Dr. Fascia)
-      const response = await flowiseService.sendMessage(request)
+      // Get response from Flowise (Dr. Fascia) with fallback
+      let response: ChatMessage
+      try {
+        response = await flowiseService.sendMessage(request)
+      } catch (error) {
+        console.warn('Flowise service failed, trying proxy:', error)
+        
+        // Fallback to proxy service
+        const proxyResponse = await flowiseProxy.query({
+          question: message,
+          chatHistory: []
+        })
+        
+        if (proxyResponse.success) {
+          response = {
+            id: `flowise-proxy-${Date.now()}`,
+            content: proxyResponse.text,
+            role: 'assistant',
+            timestamp: new Date().toISOString(),
+            sources: [],
+            processingTime: 0
+          }
+        } else {
+          throw new Error(`Flowise proxy failed: ${proxyResponse.error}`)
+        }
+      }
 
       // Update with Flowise response
       set((state) => ({

@@ -39,16 +39,22 @@ class FlowiseService {
 
   async query(data: FlowiseRequest): Promise<FlowiseResponse> {
     try {
+      // Add CORS mode and additional headers for browser compatibility
       const response = await fetch(this.endpoint, {
         headers: {
           Authorization: this.authorization,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
         method: "POST",
+        mode: "cors",
+        credentials: "omit",
         body: JSON.stringify(data)
       })
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Flowise API error response:', errorText)
         throw new Error(`Flowise API error: ${response.status} ${response.statusText}`)
       }
 
@@ -56,6 +62,12 @@ class FlowiseService {
       return result
     } catch (error) {
       console.error('Flowise API error:', error)
+      
+      // If it's a CORS error, provide a helpful message
+      if (error instanceof TypeError && error.message.includes('CORS')) {
+        throw new Error('CORS error: Unable to connect to Flowise API. Please check the API endpoint configuration.')
+      }
+      
       throw error
     }
   }
