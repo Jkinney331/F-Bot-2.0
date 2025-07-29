@@ -11,31 +11,50 @@ export const PINECONE_CONFIG = {
 
 // Pinecone client initialization
 export const initializePinecone = async () => {
-  const { Pinecone } = await import('@pinecone-database/pinecone')
+  console.warn('Pinecone SDK not installed. Skipping Pinecone initialization.')
+  return null
   
-  return new Pinecone({
-    apiKey: PINECONE_CONFIG.apiKey
-  })
+  // TODO: Uncomment when Pinecone SDK is installed
+  // try {
+  //   const pineconeModule = await import('@pinecone-database/pinecone')
+  //   const { Pinecone } = pineconeModule
+  //   
+  //   return new Pinecone({
+  //     apiKey: PINECONE_CONFIG.apiKey
+  //   })
+  // } catch (error) {
+  //   console.warn('Pinecone SDK not installed. Skipping Pinecone initialization.')
+  //   return null
+  // }
 }
 
 // Create index for fascia medical knowledge
 export const createFasciaIndex = async () => {
-  const pc = await initializePinecone()
+  console.warn('Pinecone not available. Skipping index creation.')
+  return
   
-  try {
-    await pc.createIndexForModel({
-      name: PINECONE_CONFIG.indexName,
-      cloud: PINECONE_CONFIG.cloud,
-      region: PINECONE_CONFIG.region,
-      embed: {
-        model: PINECONE_CONFIG.embedModel,
-        fieldMap: PINECONE_CONFIG.fieldMap,
-      },
-      waitUntilReady: true,
-    })
-    console.log('✅ Fascia medical knowledge index created successfully')
-  } catch (error) {
-    console.error('❌ Error creating Pinecone index:', error)
-    throw error
-  }
+  // TODO: Uncomment when Pinecone SDK is installed
+  // const pc = await initializePinecone()
+  // 
+  // if (!pc) {
+  //   console.warn('Pinecone not available. Skipping index creation.')
+  //   return
+  // }
+  // 
+  // try {
+  //   await pc.createIndexForModel({
+  //     name: PINECONE_CONFIG.indexName,
+  //     cloud: PINECONE_CONFIG.cloud,
+  //     region: PINECONE_CONFIG.region,
+  //     embed: {
+  //       model: PINECONE_CONFIG.embedModel,
+  //       fieldMap: PINECONE_CONFIG.fieldMap,
+  //   },
+  //   waitUntilReady: true,
+  // })
+  //   console.log('✅ Fascia medical knowledge index created successfully')
+  // } catch (error) {
+  //   console.error('❌ Error creating Pinecone index:', error)
+  //   throw error
+  // }
 } 
