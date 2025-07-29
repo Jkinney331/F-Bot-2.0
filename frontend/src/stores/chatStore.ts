@@ -8,6 +8,7 @@ import {
   CreateSessionRequest
 } from '../types'
 import { apiService } from '../services/api'
+import { flowiseService } from '../services/flowiseService'
 import { isDemo } from '../config/environment'
 
 interface ChatStore extends ChatState {
@@ -177,112 +178,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
         error: null,
       }))
 
-      // Check if in demo mode
-      const isDemoMode = isDemo()
-
-      if (isDemoMode) {
-        // Demo mode - simulate AI response
-        await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate thinking time
-
-        const mockResponses = [
-          {
-            content: `Thank you for your question about "${message}". In the context of fascia health, this is an important topic that requires careful consideration.
-
-**Key Points:**
-- Fascia is a complex connective tissue system
-- Evidence-based treatment approaches are essential
-- Individual patient assessment is critical
-
-**Recommendations:**
-1. Comprehensive patient evaluation
-2. Evidence-based treatment protocols
-3. Regular monitoring and assessment
-
-*Please note: This is a demo response. In production, F-Bot would provide evidence-based medical insights with proper citations.*`,
-            sources: [
-              {
-                type: 'pubmed' as const,
-                title: 'Fascial Research: A Systematic Review',
-                evidenceLevel: '2A' as const,
-                journal: 'Journal of Fascial Research',
-                year: 2023,
-                authors: ['Dr. Smith', 'Dr. Johnson'],
-                doi: '10.1234/demo.2023.001'
-              }
-            ]
-          },
-          {
-            content: `Regarding your inquiry about "${message}", here's what current medical literature tells us:
-
-**Clinical Evidence:**
-The fascia plays a crucial role in:
-- Mechanical support and force transmission
-- Proprioception and sensory feedback
-- Fluid dynamics and metabolic exchange
-
-**Treatment Considerations:**
-- Manual therapy techniques
-- Movement-based interventions
-- Patient education approaches
-
-**Research Updates:**
-Recent studies have shown promising results in fascial-based treatments, though more high-quality research is needed.
-
-*Demo Mode Active - Connect to F-Bot API for real medical insights*`,
-            sources: [
-              {
-                type: 'research' as const,
-                title: 'Manual Therapy for Fascial Dysfunction',
-                evidenceLevel: '1B' as const,
-                journal: 'Physical Therapy Research',
-                year: 2024
-              }
-            ]
-          }
-        ]
-
-        const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)]
-        
-        const aiResponse: ChatMessage = {
-          id: `demo-${Date.now()}`,
-          content: randomResponse.content,
-          role: 'assistant',
-          timestamp: new Date().toISOString(),
-          confidence: 0.85 + Math.random() * 0.1, // Random confidence between 85-95%
-          sources: randomResponse.sources,
-          modelUsed: selectedModel || 'Demo-GPT-4o',
-          cost: 0.002 + Math.random() * 0.003, // Random cost between $0.002-$0.005
-          processingTime: 1.5 + Math.random() * 2, // Random time between 1.5-3.5s
-          disclaimer: '⚠️ Demo Mode: This is a simulated response for testing purposes only.'
-        }
-
-        // Update with demo response
-        set((state) => ({
-          currentSession: state.currentSession ? {
-            ...state.currentSession,
-            messages: [
-              ...state.currentSession.messages.filter(m => m.id !== userMessage.id),
-              { ...userMessage, id: aiResponse.id + '-user' },
-              aiResponse,
-            ],
-            updatedAt: new Date().toISOString(),
-          } : null,
-          isTyping: false,
-        }))
-
-        // Update session in sessions list
-        set((state) => ({
-          sessions: state.sessions.map(s =>
-            s.id === currentSession.id
-              ? { ...s, updatedAt: new Date().toISOString() }
-              : s
-          ),
-        }))
-
-        return
-      }
-
-      // Production mode - use actual API
+      // Use Flowise service for real AI responses (replaces demo mode)
       const request: SendMessageRequest = {
         message,
         sessionId: currentSession.id,
@@ -291,10 +187,10 @@ Recent studies have shown promising results in fascial-based treatments, though 
         ...options,
       }
 
-      // Send to API
-      const response = await apiService.sendMessage(request)
+      // Get response from Flowise (Dr. Fascia)
+      const response = await flowiseService.sendMessage(request)
 
-      // Update with actual response
+      // Update with Flowise response
       set((state) => ({
         currentSession: state.currentSession ? {
           ...state.currentSession,
