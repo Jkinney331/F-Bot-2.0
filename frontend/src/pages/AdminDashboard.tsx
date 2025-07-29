@@ -7,6 +7,7 @@ import {
   UserGroupIcon,
   CircleStackIcon,
   ExclamationTriangleIcon,
+  CloudArrowDownIcon,
 } from '@heroicons/react/24/outline'
 import MedicalHeader from '../components/ui/MedicalHeader'
 import useAuthStore from '../stores/authStore'
@@ -14,10 +15,11 @@ import KnowledgeBaseManager from '../components/admin/KnowledgeBaseManager'
 import UserManagement from '../components/admin/UserManagement'
 import ScrapingQueue from '../components/admin/ScrapingQueue'
 import SystemSettings from '../components/admin/SystemSettings'
+import DataIngestionManager from '../components/admin/DataIngestionManager'
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuthStore()
-  const [activeTab, setActiveTab] = useState<'knowledge' | 'users' | 'scraping' | 'settings'>('knowledge')
+  const [activeTab, setActiveTab] = useState<'knowledge' | 'users' | 'scraping' | 'settings' | 'ingestion'>('knowledge')
 
   const stats = [
     {
@@ -56,6 +58,12 @@ const AdminDashboard: React.FC = () => {
       name: 'Knowledge Base',
       icon: CircleStackIcon,
       description: 'Manage PDFs, websites, and medical content',
+    },
+    {
+      id: 'ingestion' as const,
+      name: 'Data Ingestion',
+      icon: CloudArrowDownIcon,
+      description: 'Import data from PubMed, Google Scholar, ORCID, and OpenFDA',
     },
     {
       id: 'users' as const,
@@ -183,6 +191,7 @@ const AdminDashboard: React.FC = () => {
           transition={{ duration: 0.3 }}
         >
           {activeTab === 'knowledge' && <KnowledgeBaseManager />}
+          {activeTab === 'ingestion' && <DataIngestionManager />}
           {activeTab === 'users' && <UserManagement />}
           {activeTab === 'scraping' && <ScrapingQueue />}
           {activeTab === 'settings' && <SystemSettings />}

@@ -8,15 +8,22 @@ export const ENV = {
   PINECONE_API_KEY: 'pcsk_6yGqug_9TeXjbLDv5Tz2Mk5CTrvbpZjicVmevweSU65EZ2NwXXx1SbSpSMznBi8eEpCf4u',
   PINECONE_INDEX: 'fascia-medical-knowledge',
   
+  // Data Ingestion API Keys
+  GOOGLE_API_KEY: 'AIzaSyCbyCQzYq1TfN8WeUQzbRfWJW7SRYUV21g',
+  NCBI_API_KEY: '9763c4052b79322f3ab0e059352737820307',
+  ORCID_ID: '0009-0008-9552-1613',
+  OPENFDA_API_KEY: 'clAPGhikUyIQKTjwwMlmOcQF00ftAyOoHlLifjjb',
+  
   // App Configuration
   APP_NAME: 'F-Bot 2.0',
   APP_VERSION: '2.0.0',
   CACHE_BUST: Date.now(), // Force cache refresh for Netlify deployment
   
   // Feature Flags
-  ENABLE_PINECONE: false, // Temporarily disabled until SDK is installed
+  ENABLE_PINECONE: true, // Enable Pinecone integration
   ENABLE_ULTRASOUND: true,
   ENABLE_ADMIN: true,
+  ENABLE_DATA_INGESTION: true, // Enable data ingestion from APIs
   
   // Security
   HIPAA_COMPLIANT: true,

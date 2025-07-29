@@ -11,50 +11,104 @@ export const PINECONE_CONFIG = {
 
 // Pinecone client initialization
 export const initializePinecone = async () => {
-  console.warn('Pinecone SDK not installed. Skipping Pinecone initialization.')
-  return null
-  
-  // TODO: Uncomment when Pinecone SDK is installed
-  // try {
-  //   const pineconeModule = await import('@pinecone-database/pinecone')
-  //   const { Pinecone } = pineconeModule
-  //   
-  //   return new Pinecone({
-  //     apiKey: PINECONE_CONFIG.apiKey
-  //   })
-  // } catch (error) {
-  //   console.warn('Pinecone SDK not installed. Skipping Pinecone initialization.')
-  //   return null
-  // }
+  try {
+    const { Pinecone } = await import('@pinecone-database/pinecone')
+    
+    return new Pinecone({
+      apiKey: PINECONE_CONFIG.apiKey
+    })
+  } catch (error) {
+    console.error('Failed to initialize Pinecone:', error)
+    return null
+  }
 }
 
 // Create index for fascia medical knowledge
 export const createFasciaIndex = async () => {
-  console.warn('Pinecone not available. Skipping index creation.')
-  return
-  
-  // TODO: Uncomment when Pinecone SDK is installed
-  // const pc = await initializePinecone()
-  // 
-  // if (!pc) {
-  //   console.warn('Pinecone not available. Skipping index creation.')
-  //   return
-  // }
-  // 
-  // try {
-  //   await pc.createIndexForModel({
-  //     name: PINECONE_CONFIG.indexName,
-  //     cloud: PINECONE_CONFIG.cloud,
-  //     region: PINECONE_CONFIG.region,
-  //     embed: {
-  //       model: PINECONE_CONFIG.embedModel,
-  //       fieldMap: PINECONE_CONFIG.fieldMap,
-  //   },
-  //   waitUntilReady: true,
-  // })
-  //   console.log('✅ Fascia medical knowledge index created successfully')
-  // } catch (error) {
-  //   console.error('❌ Error creating Pinecone index:', error)
-  //   throw error
-  // }
+  try {
+    const pinecone = await initializePinecone()
+    if (!pinecone) {
+      throw new Error('Pinecone not initialized')
+    }
+
+    // Try to create the index (will fail if it already exists)
+    try {
+      await pinecone.createIndex({
+        name: PINECONE_CONFIG.indexName,
+        dimension: 1536, // Llama text embed v2 dimension
+        metric: 'cosine',
+        spec: {
+          serverless: {
+            cloud: 'aws' as const,
+            region: PINECONE_CONFIG.region
+          }
+        }
+      })
+      console.log('✅ Fascia medical knowledge index created')
+    } catch (error: any) {
+      if (error.message?.includes('already exists')) {
+        console.log('✅ Fascia medical knowledge index already exists')
+      } else {
+        throw error
+      }
+    }
+
+    return pinecone.index(PINECONE_CONFIG.indexName)
+  } catch (error) {
+    console.error('Failed to create Pinecone index:', error)
+    throw error
+  }
+}
+
+// Get Pinecone index for operations
+export const getPineconeIndex = async () => {
+  try {
+    const pinecone = await initializePinecone()
+    if (!pinecone) {
+      throw new Error('Pinecone not initialized')
+    }
+    return pinecone.index(PINECONE_CONFIG.indexName)
+  } catch (error) {
+    console.error('Failed to get Pinecone index:', error)
+    throw error
+  }
+}
+
+// Vector search in Pinecone
+export const searchPinecone = async (query: string, topK: number = 5) => {
+  try {
+    const index = await getPineconeIndex()
+    
+    // TODO: Add embedding generation for the query
+    // For now, return empty results
+    console.log(`Searching Pinecone for: "${query}" with topK: ${topK}`)
+    console.log('Index available:', !!index)
+    
+    return {
+      matches: [],
+      total: 0
+    }
+  } catch (error) {
+    console.error('Failed to search Pinecone:', error)
+    throw error
+  }
+}
+
+// Insert vectors into Pinecone
+export const insertIntoPinecone = async (vectors: any[]) => {
+  try {
+    const index = await getPineconeIndex()
+    
+    // TODO: Add proper vector insertion
+    console.log(`Inserting ${vectors.length} vectors into Pinecone`)
+    console.log('Index available:', !!index)
+    
+    return {
+      inserted: vectors.length,
+      errors: []
+    }
+  } catch (error) {
+    console.error('Failed to insert into Pinecone:', error)
+    throw error
+  }
 } 

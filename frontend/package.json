@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
+    "@pinecone-database/pinecone": "^6.1.2",
     "@tailwindcss/typography": "^0.5.16",
     "axios": "^1.6.2",
     "clsx": "^2.0.0",
